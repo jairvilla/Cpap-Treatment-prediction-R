@@ -1,0 +1,44 @@
+---
+title: "GitHub usando R"
+author: "Dr. Jair Villanueva P."
+date: "2/4/2021"
+output:
+  pdf_document: default
+  toc: TRUE
+---
+
+## Instrucciones
+
+Cada una de sus asignaciones comenzará con los siguientes pasos.
+
+1. Repositorio de asignación de clonación
+
+Vaya a la organización [EW3006 Ciencia de datos](https://github.com/EW-DataScienceforHC) en GitHub ( https://github.com/EW-DataScienceforHC). Haga clic en el repositorio con el nombre **lab-01**. Contiene los documentos iniciales que necesita para completar el laboratorio.
+
+2. Clonar Repositorio en GitHub 
+
+Haga clic en el botón verde Clonar o descargar , seleccione Usar HTTPS (es posible que esto ya esté seleccionado de manera predeterminada, y si lo está, verá el texto Clonar con HTTPS como en la imagen a continuación). Haga clic en el icono del portapapeles para copiar la URL del repositorio.
+
+3. Crear un nuevo proyecto
+
+Vaya a RStudio y *Cree un nuevo proyecto*. Deberá hacer clic en la flecha hacia abajo junto al botón Nuevo proyecto para ver esta opción.
+
+4. Copia y pega tu trabajo
+
+Copie y pegue la URL de su repositorio de asignaciones en el cuadro de diálogo. Asegúrese de que la opción "Agregar paquetes del proyecto base" esté marcada.
+
+5. Acepta
+Haga clic en Aceptar y debería ver el contenido de su repositorio de GitHub en el panel Archivos en RStudio.
+
+## Configurar git:
+1.- Utilice la función *use_git_config()* del usethis paquete para configurar Git, de modo que RStudio y GitHub puedan comunicarse entre sí.
+
+2.- Escriba las siguientes líneas de código en la consola de RStudio completando su nombre y dirección de correo electrónico.
+
+library(usethis)
+use_git_config(user.name="your name", user.email="your email")
+
+3.- Una vez que ejecute el código, sus valores para user.name y user.email se mostrarán en la consola. Si tu user.name y user.email son correctos, ¡estás listo! De lo contrario, vuelva a ejecutar el código con los cambios necesarios.
+
+Nombre del proyecto:
+Actualmente su proyecto se llama Proyecto sin título . Actualice el nombre de su proyecto para que sea "Laboratorio 02 - Reproducción y visualización de datos".
