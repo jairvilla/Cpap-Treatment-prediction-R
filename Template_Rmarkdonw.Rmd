@@ -1,5 +1,5 @@
 ---
-title: "Titulo del text"
+title: "Titulo del Texto"
 description: |
   A new article created using the Distill format.
 author:
@@ -17,14 +17,18 @@ knitr::opts_chunk$set(warning = FALSE,
                       message  = FALSE)
 ```
 
+## Prueba para el gitHub
 
 ## Introduction
+## [Introduction](https://www.tidymodels.org/start/models/#intro)
+
+Para añadir una direccion o enlace a un título 
 
 This is an example to show how you can easily write posts for your website using R Markdown! 
 
 ### Load packages
 
-```{r}
+```{r }
 library(tidyverse)
 library(knitr)
 library(broom)
