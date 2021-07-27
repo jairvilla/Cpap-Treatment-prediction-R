@@ -1,13 +1,12 @@
 # Title: Machine learning approaches for identifying predictors to CPAP 
 #        Adherence in OSA patients
-# Data set: CPAP3.xlsx
+# Data set: CPAP1.SAV
 # Aims:To identify potential variables to improve CPAP treatment 
 # Predictive Model: SVM, Random forest, KNN.
 # Author: Jair villanueva, @2019 
-#
 #...........................................................
 
-# Install Packages for machine lerning models ----
+# Install Packages for ML models ----
 if(!require(caret)) install.packages("caret");
 if(!require(kernlab)) install.packages("kernlab");
 if(!require(mlr3)) install.packages("mlr3");
@@ -18,7 +17,8 @@ if(!require(e1071)) install.packages("e1071")
 install.packages(c("pROC","glmnet","kernab","DT","psych","compareGroups","haven",
                    "klaR", "pscl","gmodels","xtable","randomForest", "ggpubr"))
 
-# Load Packages for machine lerning models ------
+
+# Load Packages for ML models ------
 libraries <- c("dplyr", "tidyr", "caret","xtable","data.table", "lubridate","ROCR",
           "broom", "klaR","randomForest","corrplot", "nnet","DT","rio","pROC",
           "tidyverse","pscl","psych", "MASS", "ggplot2", "kernlab", "knitr", 
@@ -36,7 +36,6 @@ load(file = "run20.RData")
 # Export dataframe to cvs file 
 getwd()
 write.csv(cpap2,"C:/Users/jvill/Desktop/Desktop/DataScience-2021/3-CPAP-Prediction/Cpap-Treatment-prediction-R\\cpapfinal.csv", row.names = TRUE)
-
 #............................................................
 
 # ...........................................................
@@ -51,77 +50,71 @@ str(cpap1)
 #--- original dataset 2 (430/50)
 cpap2 <- as.data.frame(read_sav("data/originalCpap_02.sav")) # original dataset
 dim(cpap2)
-head(cpap2, 10)
+str(cpap2)
 
 # Split into two Groups: PSG and HRP 
-table(cpap2$grupo2)
+table(cpap1$grupo2)  # HPR: 218 and PSG: 212 observations
 
-# Filter by PSG and HRP method 
+# Filter by PSG and HRP diag. method 
 psg <- cpap1 %>%
   filter(grupo2=="PSG", abandono=="no")
-dim(psg)
+dim(psg)  # 167 x 335
 
 hrp <- cpap1 %>%
   filter(grupo2=="HRP", abandono=="no")
-dim(hrp)
+dim(hrp)  # 187 x 335
 
 # NA Values 
 missing <- as.data.frame(colSums(is.na(psg))) 
 missing  
 
+
 # Selecting variables from psg dataset ----
 psgfinal <- psg %>%
   dplyr::select ("sexo","edad", "depresion","hta","ansiedad","cardio","enf_neuro","enf_respira",
-"dm","dislipe", "neoplasias", "acc_laboral","acc_trafico","fuma", "bebe", "epworth", 
-"talla", "peso", "p_cuello","depresion_A", "glucosa", "creatinina", "urico", "ast",   
-"colesterol", "hdl", "ldl", "trigliceridos", "hemoglobina", "hematies", "tsh",
-"hematocrito", "fibrinogeno","plaquetas", "leucocitos", "hba1c","alt","cefalina",   
- "tas", "tad", "ta_media_24", "ta_media_diurna", "ta_media_nocturna", "ta_diastolica_24",
-"ta_sistolica_24", "ta_sistolica_diurna","ta_sistolica_nocturna", "tas_valle","tad_pico",  
-"ta_diastolica_diurna", "ta_diastolica_nocturna", "tas_pico", "p_superficial_psg", 
-"tad_valle", "fcard_dia", "fcard_noche", "tiempo_total_psg", "sato2_media_psg", 
-"p_profundo_psg", "p_rem_psg", "ind_arousal_psg", "iah_psg", "somno_conducir", "uci_dias",
-"tc90_psg", "i_desatura_psg", "epworth_A", "escala_asda",  "sf36_fm", "eq50","sf36_ff",
-"acc_trafico_F","acc_laboral_F", "acc_laboral_lesiones","fosq",  
- "n_horas_dia_A","n_horas_dia_B","n_horas_dia_C")
+        "dm","dislipe", "neoplasias", "acc_laboral","acc_trafico","fuma", "bebe", "epworth", 
+        "talla", "peso", "p_cuello","depresion_A", "glucosa", "creatinina", "urico", "ast",   
+        "colesterol", "hdl", "ldl", "trigliceridos", "hemoglobina", "hematies", "tsh",
+        "hematocrito", "fibrinogeno","plaquetas", "leucocitos", "hba1c","alt","cefalina",   
+        "tas", "tad", "ta_media_24", "ta_media_diurna", "ta_media_nocturna", "ta_diastolica_24",
+        "ta_sistolica_24", "ta_sistolica_diurna","ta_sistolica_nocturna", "tas_valle","tad_pico",  
+        "ta_diastolica_diurna", "ta_diastolica_nocturna", "tas_pico", "p_superficial_psg", 
+        "tad_valle", "fcard_dia", "fcard_noche", "tiempo_total_psg", "sato2_media_psg", 
+        "p_profundo_psg", "p_rem_psg", "ind_arousal_psg", "iah_psg", "somno_conducir", "uci_dias",
+        "tc90_psg", "i_desatura_psg", "epworth_A", "escala_asda",  "sf36_fm", "eq50","sf36_ff",
+        "acc_trafico_F","acc_laboral_F", "acc_laboral_lesiones","fosq",  
+        "n_horas_dia_A")
+
+# Anoter outcome : "n_horas_dia_B","n_horas_dia_C"
 
 dim(psgfinal)
 
-
-# Dataset: cpap3_copy
 ## This dataset constains non-redundant variables,standarize categorical varaibles as factor
-# ## cpap as binary data.
-# ## 214 obs. of 52 features 
-# 
-# # Run 6 -- 
 # cpap3 <- dplyr::select(cpap1, glucosa,  ta_media_diurna, ta_media_nocturna, ta_media_24, 
 #                        ta_sistolica_24, ta_sistolica_diurna, tas1, ta_sistolica_nocturna,
 #                        tas_pico, arousal, iah, doi, enf_respira_A, class)
-# 
-# str(cpap3)                             
-# # ds = significant variables  ----
+                    
+
+# Otro dataset ----
 # cpap3 <- dplyr::select(cpap1, tas_pico, enf_respira_A, neoplasias_A, arousal, fibrinogeno, 
 #                        fosq, analogica, tas1, asda, depresion_A, quick, hematocrito, 
 #                        cuello, hdl, hemoglobina, ast, class)
 
-# Exploratory Analysis  ----
-# NA's Handle 
-str(psgfinal)
-missing <- as.data.frame(colSums(is.na(psgfinal))) 
-missing  
-
-
-#.............................................
 
 # Pre-processing data ----
 # Convert outcome in factor
 psgfinal$n_horas_dia_A <- as.factor(ifelse(psgfinal$n_horas_dia_A>=4, 1, 0))  # response variable (Cumplimiento)
+dim(psgfinal)
+
+summary(psgfinal)
 
 ## Convert chr variables to factor
 psgfinal   <-  as.data.frame(unclass(psgfinal),
                 stringsAsFactors = TRUE)
 summary(psgfinal)
 str(psgfinal)
+
+
 
 # Select numeric variables
 psgnumeric <- psgfinal %>%
@@ -131,9 +124,26 @@ dim(psgnumeric)
 names(psgnumeric)
 
 # Numerica excluyendo outcome
-psgnumeric2 <- psgnumeric %>%
+
+
+psgnumeric2 <- psgnumeric %>%  # Contiene variables numericas + outcome cpap 1mes
   dplyr::select(edad:fosq)
 dim(psgnumeric2)
+
+
+
+
+# Exploratory Analysis  ----
+
+# NA's Handle 
+str(psgfinal)
+missing <- as.data.frame(colSums(is.na(psgfinal))) 
+missing  
+
+
+#.............................................
+
+
 
 # Applying Mice algorithm 
 
