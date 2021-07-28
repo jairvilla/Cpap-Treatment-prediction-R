@@ -35,10 +35,11 @@ load(file = "run20.RData")
 
 # Export dataframe to cvs file 
 getwd()
-write.csv(cpap2,"C:/Users/jvill/Desktop/Desktop/DataScience-2021/3-CPAP-Prediction/Cpap-Treatment-prediction-R\\cpapfinal.csv", row.names = TRUE)
+write.csv(psgfinal,"C:/Users/jvill/Desktop/Desktop/DataScience-2021/3-CPAP-Prediction/Cpap-Treatment-prediction-R\\psgfinal.RData", row.names = TRUE)
+
 #............................................................
 
-# ...........................................................
+
 # Load and explore the dataset (cpap) from SAV Format
 # cpap contains the features and information clinical patients from dataset  
 
@@ -114,21 +115,64 @@ psgfinal   <-  as.data.frame(unclass(psgfinal),
 summary(psgfinal)
 str(psgfinal)
 
-
-
-# Select numeric variables
-psgnumeric <- psgfinal %>%
+# Select Numerical Variable
+psgnum <- psgfinal %>%
   dplyr::select_if(is.numeric)
+names(psgnum)
 
-dim(psgnumeric) 
-names(psgnumeric)
+# Export initial describe stats from dataset psgfinal
 
-# Numerica excluyendo outcome
+sink(file = "resultspsg.csv", append = T)
+describe(psgnum, na.rm = T)
+sink()
 
+# Apply MICE Algorithm 
 
-psgnumeric2 <- psgnumeric %>%  # Contiene variables numericas + outcome cpap 1mes
-  dplyr::select(edad:fosq)
-dim(psgnumeric2)
+# Plot NA Count 
+psgnum %>% 
+  summarise_all(funs(sum(is.na(.)))) %>%     # Return a barplot with missing data 
+  gather %>% 
+  ggplot(aes(x = reorder(key, value), y =value)) + geom_bar(stat = "identity") +
+  coord_flip() +
+  xlab("variable") +
+  ylab("Absolute number of missings")
+
+# Mice Algorithm ----
+if(!require(VIM)) install.packages("VIM");
+if(!require(mice)) install.packages("mice");
+library(VIM);library(mice)
+
+imp <-mice(psgnum, m=5, printFlag=FALSE, maxit = 5, seed=145)
+psgnumx <- complete(imp,5)
+dim(psgnumx)
+
+# Check NA again ----
+miss <- data.frame(Missdata = sapply(psgnumx, function(x) sum(is.na(x))))
+print(miss)                     
+
+sink(file = "resultspsgMice.csv", append = T)
+describe(psgnumx, na.rm = T)
+sink()
+
+# Select numeric variables with MICE + Outcome 
+cpapfinal  <- cbind(psgnumx,class=psgfinal$n_horas_dia_A) 
+dim(cpapfinal)
+
+# Complete case 
+# Keep only complete cases for the complete case analysis
+cpapfinal <- cpapfinal[which(complete.cases(cpapfinal) == TRUE), ]
+
+# Scatterplot correlation Coeficient
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+corrplot(cpapfinal, method = "color", col = col(200),  
+         type = "upper", order = "hclust", 
+         addCoef.col = "black", # Add coefficient of correlation
+         tl.col = "darkblue", tl.srt = 45, #Text label color and rotation
+         # Combine with significance level
+         p.mat = p_mat, sig.level = 0.01,  
+         # hide correlation coefficient on the principal diagonal
+         diag = FALSE 
+)
 
 
 
